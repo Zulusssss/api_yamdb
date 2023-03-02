@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import viewsets
 from rest_framework import filters
 
@@ -96,7 +97,7 @@ class GenreViewSet(ListCreateDeleteViewSet):
 
 # Необходимо добавлять rating.
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score')).all()
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrSuperuserOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
