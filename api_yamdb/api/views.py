@@ -2,7 +2,6 @@ from django.db.models import Avg
 from rest_framework import viewsets
 from rest_framework import filters
 
-
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
@@ -16,7 +15,8 @@ from .permissions import (
     IsAdminModerAuthorOrReadonly
 )
 from .mixins import ListCreateDeleteViewSet
-from reviews.models import Category, Genre, Title, GenreTitle, Review, Comment, User
+from reviews.models import Category, Genre, Title, GenreTitle, Review, Comment, \
+    User
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -37,24 +37,21 @@ class UserViewSet(viewsets.ModelViewSet):
 #     """
 #     Вьюсет для просмотра и редактирования своег опрофиля.
 #     """
-    
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAdminModerAuthorOrReadonly,)
+    # http_method_names = ("get", "post", "delete", "patch")
+
+    def get_title(self):
+        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
 
     def get_queryset(self):
-        return get_object_or_404(
-            Title, id=self.kwargs.get('title_id')
-        ).reviews.all()
+        return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Review, id=self.kwargs.get('title_id'))
-        serializer.save(
-            author=self.request.user,
-            title=title
-        )
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -65,13 +62,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
         return review.comments.all()
 
-
     def perform_create(self, serializer):
         review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
         serializer.save(author=self.request.user, review=review)
-
-
-
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -82,7 +75,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_value_regex = "[-a-zA-Z0-9_]+"
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-
 
 
 class GenreViewSet(ListCreateDeleteViewSet):

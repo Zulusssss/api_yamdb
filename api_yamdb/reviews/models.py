@@ -3,21 +3,25 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, \
+    RegexValidator
 
 
 class Category(models.Model):
     name = models.CharField(max_length=256, verbose_name='Название категории')
-    slug = models.SlugField(unique=True, max_length=50, verbose_name='Слаг категории')
+    slug = models.SlugField(unique=True, max_length=50,
+                            verbose_name='Слаг категории')
 
 
 class Genre(models.Model):
     name = models.CharField(max_length=256, verbose_name='Название жанра')
-    slug = models.SlugField(unique=True, max_length=50, verbose_name='Слаг жанра')
+    slug = models.SlugField(unique=True, max_length=50,
+                            verbose_name='Слаг жанра')
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256, verbose_name='Название произведения')
+    name = models.CharField(max_length=256,
+                            verbose_name='Название произведения')
     year = models.IntegerField(verbose_name='Дата')
     genre = models.ManyToManyField(Genre, through='GenreTitle')
     category = models.ForeignKey(
@@ -28,7 +32,8 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория'
     )
-    description = models.TextField(blank=True, null=True, verbose_name='Описание')
+    description = models.TextField(blank=True, null=True,
+                                   verbose_name='Описание')
 
 
 class GenreTitle(models.Model):
@@ -45,7 +50,6 @@ class GenreTitle(models.Model):
         on_delete=models.SET_NULL
     )
 
-
     class Meta:
         constraints = [
             UniqueConstraint(fields=['genre', 'title'], name='genre_and_title')
@@ -58,13 +62,13 @@ ROLE_CHOICES = (
     ('user', 'Пользователь'),
 )
 
+
 def validate_me(value):
     if re.search('^me\Z', value):
         raise ValidationError(f'username can\'t be {value}')
 
 
 class User(AbstractUser):
-
     username = models.CharField(
         max_length=150,
         unique=True,
@@ -72,7 +76,8 @@ class User(AbstractUser):
         null=False,
         validators=[
             RegexValidator(
-                '^[\w.@+-]+\z', message='username must be ^[\w.@+-]+\Z', code='invalid_user'
+                '^[\w.@+-]+\z', message='username must be ^[\w.@+-]+\Z',
+                code='invalid_user'
             ),
             validate_me,
         ]
@@ -126,7 +131,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
-        
+
     @property
     def is_admin(self):
         return self.role == "admin" or self.is_superuser
@@ -141,6 +146,7 @@ class Review(models.Model):
     text = models.CharField('Текст отзыва', max_length=500)
     score = models.IntegerField(
         'Оценка',
+        default=None,
         validators=(
             MinValueValidator(1, 'Минимальная оценка - 1'),
             MaxValueValidator(10, 'Максимальная оценка - 10')
@@ -153,7 +159,7 @@ class Review(models.Model):
                               on_delete=models.CASCADE,
                               related_name='reviews')
     pub_date = models.DateTimeField('Дата публикации',
-                                auto_now_add=True)
+                                    auto_now_add=True)
 
     class Meta:
         ordering = ('-pub_date',)
