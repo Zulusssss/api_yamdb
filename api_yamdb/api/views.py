@@ -42,7 +42,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAdminModerAuthorOrReadonly,)
-    # http_method_names = ("get", "post", "delete", "patch")
+    http_method_names = ("get", "post", "delete", "patch")
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -53,6 +53,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, title=self.get_title())
 
+    # def perform_update(self, serializer):
+    #     serializer.save()
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer

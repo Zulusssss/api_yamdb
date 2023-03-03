@@ -24,18 +24,19 @@ class ReviewSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
         read_only=True
     )
+    score = serializers.HiddenField(default=None)
 
     class Meta:
         model = Review
         fields = ('id', 'author', 'score', 'text', 'pub_date', 'title')
         read_only_fields = ('author', 'title', 'pub_date')
 
-    def validate_score(self, score):
-        """Валидация введенной оценки."""
-        if 10 < score < 0:
-            raise ValidationError(
-                'Оценка произведения должна быть в диапазоне от 1 до 10 баллов'
-            )
+    # def validate_score(self, score):
+    #     """Валидация введенной оценки."""
+    #     if 10 < score < 0:
+    #         raise ValidationError(
+    #             'Оценка произведения должна быть в диапазоне от 1 до 10 баллов'
+    #         )
 
     def validate(self, data):
         """Проверка повторного отзыва к текущему произведению."""

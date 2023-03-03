@@ -147,6 +147,7 @@ class Review(models.Model):
     score = models.IntegerField(
         'Оценка',
         default=None,
+        null=True,
         validators=(
             MinValueValidator(1, 'Минимальная оценка - 1'),
             MaxValueValidator(10, 'Максимальная оценка - 10')
